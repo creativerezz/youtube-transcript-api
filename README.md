@@ -14,6 +14,14 @@ A FastAPI-based server that provides convenient endpoints for extracting informa
 - Clean and RESTful API design
 - Comprehensive error handling
 
+## Quick Deploy to Railway
+
+Deploy this API server to Railway in 2 minutes:
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new?template=https://github.com/creativerezz/youtube-api-server-1)
+
+See [QUICK_START.md](QUICK_START.md) for detailed deployment instructions.
+
 ## Prerequisites
 
 - Python 3.12+
