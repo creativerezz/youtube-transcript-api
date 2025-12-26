@@ -3,7 +3,28 @@
     "allow": [
       "Bash(uv sync:*)",
       "Bash(./test_endpoints.sh)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(railway whoami:*)",
+      "Bash(railway init:*)",
+      "Bash(railway link --help:*)",
+      "Bash(railway up --help:*)",
+      "Bash(railway status:*)",
+      "Bash(ls:*)",
+      "Bash(git add:*)",
+      "Bash(cat:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(railway open:*)",
+      "Bash(chmod:*)",
+      "Bash(open \"https://railway.app/new?template=https://github.com/creativerezz/youtube-api-server-1\")",
+      "Bash(railway link:*)",
+      "Bash(railway up:*)",
+      "Bash(railway service:*)",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "mcp__plugin_context7_context7__get-library-docs",
+      "Bash(railway variables:*)",
+      "Bash(railway domain --help:*)"
     ]
   }
 }
