@@ -396,6 +396,23 @@ async def health_check():
         "parallel_processing": "enabled"
     }
 
+@app.get("/")
+async def root():
+    """Root endpoint with API information"""
+    return {
+        "name": "YouTube Tools API",
+        "version": "1.0.0",
+        "endpoints": {
+            "GET /": "This info",
+            "GET /health": "Health check",
+            "POST /video-data": "Get video metadata",
+            "POST /video-captions": "Get video captions/transcripts",
+            "POST /video-timestamps": "Get timestamped transcripts",
+            "POST /video-transcript-languages": "List available languages"
+        },
+        "docs": "/docs"
+    }
+
 if __name__ == "__main__":
     # Use environment variable for port, default to 8000 if not set
     port = int(os.getenv("PORT", 8000))
