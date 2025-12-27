@@ -93,34 +93,91 @@ print(f"[{datetime.now()}] FastAPI app initialized")
 
 class YouTubeTools:
     @staticmethod
-    def get_youtube_video_id(url: str) -> Optional[str]:
-        """Function to get the video ID from a YouTube URL."""
-        print(f"[{datetime.now()}] get_youtube_video_id called with URL: {url}")
+    def get_youtube_video_id(url_or_id: str) -> Optional[str]:
+        """
+        Function to get the video ID from a YouTube URL or extract from various URL formats.
+        Also accepts direct video IDs (11 characters).
 
-        parsed_url = urlparse(url)
-        hostname = parsed_url.hostname
-        print(f"[{datetime.now()}] Parsed hostname: {hostname}")
+        Supported formats:
+        - Direct video ID: "dQw4w9WgXcQ"
+        - Standard: https://www.youtube.com/watch?v=VIDEO_ID
+        - Short: https://youtu.be/VIDEO_ID
+        - Embed: https://www.youtube.com/embed/VIDEO_ID
+        - Short format: https://youtube.com/shorts/VIDEO_ID
+        - Live: https://www.youtube.com/live/VIDEO_ID
+        - Mobile: https://m.youtube.com/watch?v=VIDEO_ID
+        - With timestamp: https://youtu.be/VIDEO_ID?t=123
+        - With playlist: https://www.youtube.com/watch?v=VIDEO_ID&list=...
+        """
+        print(f"[{datetime.now()}] get_youtube_video_id called with input: {url_or_id}")
 
-        if hostname == "youtu.be":
-            video_id = parsed_url.path[1:]
-            print(f"[{datetime.now()}] Extracted video ID from youtu.be: {video_id}")
-            return video_id
-        if hostname in ("www.youtube.com", "youtube.com"):
-            if parsed_url.path == "/watch":
-                query_params = parse_qs(parsed_url.query)
-                video_id = query_params.get("v", [None])[0]
-                print(f"[{datetime.now()}] Extracted video ID from watch URL: {video_id}")
-                return video_id
-            if parsed_url.path.startswith("/embed/"):
-                video_id = parsed_url.path.split("/")[2]
-                print(f"[{datetime.now()}] Extracted video ID from embed URL: {video_id}")
-                return video_id
-            if parsed_url.path.startswith("/v/"):
-                video_id = parsed_url.path.split("/")[2]
-                print(f"[{datetime.now()}] Extracted video ID from /v/ URL: {video_id}")
+        # Check if it's already a video ID (11 characters, alphanumeric with - and _)
+        if len(url_or_id) == 11 and all(c.isalnum() or c in '-_' for c in url_or_id):
+            print(f"[{datetime.now()}] Input appears to be a direct video ID: {url_or_id}")
+            return url_or_id
+
+        # Try to parse as URL
+        try:
+            parsed_url = urlparse(url_or_id)
+            hostname = parsed_url.hostname
+
+            # Handle missing scheme
+            if not hostname:
+                # Try adding https:// if it looks like a URL
+                if 'youtube.com' in url_or_id or 'youtu.be' in url_or_id:
+                    parsed_url = urlparse(f"https://{url_or_id}")
+                    hostname = parsed_url.hostname
+                else:
+                    print(f"[{datetime.now()}] ERROR: Could not parse hostname from: {url_or_id}")
+                    return None
+
+            print(f"[{datetime.now()}] Parsed hostname: {hostname}")
+
+            # youtu.be format (short links)
+            if hostname in ("youtu.be", "www.youtu.be"):
+                # Extract video ID from path (remove leading slash and any query params)
+                video_id = parsed_url.path[1:].split('?')[0].split('&')[0]
+                print(f"[{datetime.now()}] Extracted video ID from youtu.be: {video_id}")
                 return video_id
 
-        print(f"[{datetime.now()}] ERROR: Could not extract video ID from URL: {url}")
+            # youtube.com formats
+            if hostname in ("www.youtube.com", "youtube.com", "m.youtube.com", "music.youtube.com"):
+                # Standard watch URL: /watch?v=VIDEO_ID
+                if parsed_url.path == "/watch" or parsed_url.path.startswith("/watch?"):
+                    query_params = parse_qs(parsed_url.query)
+                    video_id = query_params.get("v", [None])[0]
+                    print(f"[{datetime.now()}] Extracted video ID from watch URL: {video_id}")
+                    return video_id
+
+                # Embed URL: /embed/VIDEO_ID
+                if parsed_url.path.startswith("/embed/"):
+                    video_id = parsed_url.path.split("/")[2].split('?')[0]
+                    print(f"[{datetime.now()}] Extracted video ID from embed URL: {video_id}")
+                    return video_id
+
+                # Old format: /v/VIDEO_ID
+                if parsed_url.path.startswith("/v/"):
+                    video_id = parsed_url.path.split("/")[2].split('?')[0]
+                    print(f"[{datetime.now()}] Extracted video ID from /v/ URL: {video_id}")
+                    return video_id
+
+                # Shorts format: /shorts/VIDEO_ID
+                if parsed_url.path.startswith("/shorts/"):
+                    video_id = parsed_url.path.split("/")[2].split('?')[0]
+                    print(f"[{datetime.now()}] Extracted video ID from shorts URL: {video_id}")
+                    return video_id
+
+                # Live format: /live/VIDEO_ID
+                if parsed_url.path.startswith("/live/"):
+                    video_id = parsed_url.path.split("/")[2].split('?')[0]
+                    print(f"[{datetime.now()}] Extracted video ID from live URL: {video_id}")
+                    return video_id
+
+        except Exception as e:
+            print(f"[{datetime.now()}] ERROR: Exception while parsing URL: {str(e)}")
+            return None
+
+        print(f"[{datetime.now()}] ERROR: Could not extract video ID from input: {url_or_id}")
         return None
 
     @staticmethod

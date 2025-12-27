@@ -12,10 +12,19 @@ https://transcript.youtubesummaries.cc
 ## 📋 Quick Examples
 
 ### 1️⃣ Get Video Metadata (Fastest)
+
+**Using full URL:**
 ```bash
 curl -X POST https://transcript.youtubesummaries.cc/video-data \
   -H "Content-Type: application/json" \
-  -d '{"url": "https://www.youtube.com/watch?v=VIDEO_ID"}'
+  -d '{"url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}'
+```
+
+**Using just the video ID:**
+```bash
+curl -X POST https://transcript.youtubesummaries.cc/video-data \
+  -H "Content-Type: application/json" \
+  -d '{"url": "dQw4w9WgXcQ"}'
 ```
 
 **Response:**
@@ -239,14 +248,56 @@ function MyComponent() {
 
 ## 🔍 Supported YouTube URL Formats
 
-✅ All these formats work:
+✅ **All these formats work** (20+ variations supported):
+
+**Direct video IDs:**
 ```
-https://www.youtube.com/watch?v=VIDEO_ID
-https://youtube.com/watch?v=VIDEO_ID
-https://youtu.be/VIDEO_ID
-https://www.youtube.com/embed/VIDEO_ID
-https://www.youtube.com/v/VIDEO_ID
+dQw4w9WgXcQ
 ```
+
+**Standard URLs:**
+```
+https://www.youtube.com/watch?v=dQw4w9WgXcQ
+https://youtube.com/watch?v=dQw4w9WgXcQ
+http://www.youtube.com/watch?v=dQw4w9WgXcQ
+```
+
+**Short URLs:**
+```
+https://youtu.be/dQw4w9WgXcQ
+http://youtu.be/dQw4w9WgXcQ
+youtu.be/dQw4w9WgXcQ
+```
+
+**With query parameters:**
+```
+https://youtu.be/dQw4w9WgXcQ?t=123
+https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PLtest
+https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42s
+```
+
+**Embed URLs:**
+```
+https://www.youtube.com/embed/dQw4w9WgXcQ
+https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1
+```
+
+**Special formats:**
+```
+https://www.youtube.com/shorts/dQw4w9WgXcQ      (Shorts)
+https://www.youtube.com/live/dQw4w9WgXcQ        (Live)
+https://m.youtube.com/watch?v=dQw4w9WgXcQ       (Mobile)
+https://music.youtube.com/watch?v=dQw4w9WgXcQ   (Music)
+https://www.youtube.com/v/dQw4w9WgXcQ           (Old format)
+```
+
+**Without protocol:**
+```
+www.youtube.com/watch?v=dQw4w9WgXcQ
+youtube.com/watch?v=dQw4w9WgXcQ
+```
+
+**✨ Pro tip:** You can pass just the video ID instead of the full URL!
 
 ---
 
