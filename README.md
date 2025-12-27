@@ -16,6 +16,13 @@ A FastAPI-based server that provides convenient endpoints for extracting informa
 - Comprehensive error handling
 - Cache management endpoints for monitoring and control
 
+## Quick Links
+
+- 🚀 **[API Quick Reference](API_QUICK_REFERENCE.md)** - Fast copy-paste examples for frontend developers
+- 📘 **[Frontend Integration Guide](FRONTEND_INTEGRATION.md)** - Complete React, Vue, Next.js examples
+- 🎯 **[Quick Start](QUICK_START.md)** - Get started in 2 minutes
+- 📊 **[Redis Setup](REDIS_SETUP.md)** - Enable caching for 10-56x performance boost
+
 ## Quick Deploy to Railway
 
 Deploy this API server to Railway in 2 minutes:
