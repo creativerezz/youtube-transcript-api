@@ -19,20 +19,44 @@ Since the Railway CLI requires interactive input, we'll use the Railway web dash
 3. Select your repository: `creativerezz/youtube-api-server-1`
 4. Railway will automatically detect the Python project
 
-### Step 2: Configure Environment Variables (Optional)
+### Step 2: Add Redis for Caching (Recommended)
 
-The proxy credentials are optional. If you have Webshare proxy credentials:
+Redis caching dramatically improves performance. To add Redis:
 
-1. In your Railway project dashboard, go to the "Variables" tab
-2. Add the following environment variables:
-   - `WEBSHARE_PROXY_USERNAME` - Your Webshare proxy username
-   - `WEBSHARE_PROXY_PASSWORD` - Your Webshare proxy password
+**Via Railway Dashboard:**
+1. In your Railway project, click **"+ New"**
+2. Select **"Database" → "Add Redis"**
+3. Wait for Redis to provision (takes ~30 seconds)
 
-The following variables are automatically set by Railway:
+**Via Railway CLI:**
+```bash
+railway add --plugin redis
+```
+
+The Redis service automatically creates a `REDIS_URL` variable that your API service can reference.
+
+### Step 3: Configure Environment Variables
+
+**Required for Redis Caching:**
+1. In your Railway project dashboard, click on your API service
+2. Go to the "Variables" tab
+3. Add: `REDIS_URL` = `${{Redis.REDIS_URL}}`
+   - This references the Redis service you just created
+   - Railway will automatically inject the correct URL
+
+**Optional - Proxy Configuration:**
+If you have Webshare proxy credentials:
+- `WEBSHARE_PROXY_USERNAME` - Your Webshare proxy username
+- `WEBSHARE_PROXY_PASSWORD` - Your Webshare proxy password
+
+**Optional - Cache Configuration:**
+- `CACHE_TTL_SECONDS` - Cache expiration time (default: 3600)
+
+**Automatically Set by Railway:**
 - `PORT` - Railway automatically provides this (no need to set)
 - `HOST` - Defaults to 0.0.0.0 in the application
 
-### Step 3: Deploy Configuration
+### Step 4: Deploy Configuration
 
 Railway will automatically use the deployment configuration from:
 
@@ -44,7 +68,7 @@ Railway will automatically use the deployment configuration from:
 2. **Procfile** - Backup start command configuration:
    - `web: uv run uvicorn main:app --host 0.0.0.0 --port $PORT`
 
-### Step 4: Deploy
+### Step 5: Deploy
 
 Railway will automatically deploy when you:
 - Push to the main branch (already set up)
@@ -57,19 +81,31 @@ The deployment process:
 4. Starts the server with uvicorn
 5. Exposes the service on a public URL
 
-### Step 5: Access Your Deployed API
+### Step 6: Verify Deployment
 
 After deployment completes:
 
 1. Railway will provide a public URL (format: `https://your-app.up.railway.app`)
-2. Your API will be available at the following endpoints:
-   - `GET /health` - Health check
-   - `POST /video-data` - Get video metadata
-   - `POST /video-captions` - Get video captions
-   - `POST /video-timestamps` - Get video timestamps
-   - `POST /video-transcript-languages` - List available languages
+2. Test the health endpoint:
+   ```bash
+   curl https://your-app.up.railway.app/health
+   ```
+3. Verify Redis cache is working:
+   ```bash
+   curl https://your-app.up.railway.app/cache/stats
+   ```
+   Should show: `"status": "connected"` and `"enabled": true`
 
-### Step 6: Link Local Environment to Railway (Optional)
+4. Your API will be available at the following endpoints:
+   - `GET /health` - Health check with cache status
+   - `GET /cache/stats` - Cache statistics
+   - `POST /cache/clear` - Clear cache
+   - `POST /video-data` - Get video metadata (cached)
+   - `POST /video-captions` - Get video captions (cached)
+   - `POST /video-timestamps` - Get video timestamps (cached)
+   - `POST /video-transcript-languages` - List available languages (cached)
+
+### Step 7: Link Local Environment to Railway (Optional)
 
 To manage your deployment from the CLI:
 
@@ -93,10 +129,18 @@ railway variables set WEBSHARE_PROXY_PASSWORD=your-password
 Test your deployed API:
 
 ```bash
-# Health check
+# Health check (should show cache_status: "redis_enabled")
 curl https://your-app.up.railway.app/health
 
-# Test video data endpoint
+# Check cache statistics
+curl https://your-app.up.railway.app/cache/stats
+
+# Test video data endpoint (first request - cache MISS)
+curl -X POST https://your-app.up.railway.app/video-data \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}'
+
+# Run the same request again (second request - cache HIT, much faster!)
 curl -X POST https://your-app.up.railway.app/video-data \
   -H "Content-Type: application/json" \
   -d '{"url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}'
@@ -108,6 +152,12 @@ View logs in real-time:
 ```bash
 railway logs --follow
 ```
+
+Look for cache-related log messages:
+- `[timestamp] Redis cache connected successfully`
+- `[timestamp] Cache HIT: youtube_api:video_data:abc123` (cached response served)
+- `[timestamp] Cache MISS: youtube_api:video_data:def456` (fetching from YouTube)
+- `[timestamp] Cache SET: youtube_api:video_data:def456 (TTL: 3600s)` (saving to cache)
 
 Or view them in the Railway dashboard under the "Deployments" tab.
 
@@ -132,6 +182,26 @@ The health check endpoint `/health` is configured in nixpacks.toml. If it fails:
 1. Verify the endpoint returns 200 status
 2. Check application startup logs
 3. Ensure uvicorn is starting correctly
+
+### Redis Cache Issues
+
+**Cache shows "disabled" in health check:**
+1. Verify Redis service is running: Check Railway dashboard
+2. Check `REDIS_URL` environment variable is set: `railway variables`
+3. Ensure `REDIS_URL` references correct service: `${{Redis.REDIS_URL}}`
+4. Check logs for "Redis cache connected successfully" message
+
+**Cache not improving performance:**
+1. Check `/cache/stats` endpoint - look for increasing `keyspace_hits`
+2. Verify same requests are being made (cache keys are URL-based)
+3. Check `CACHE_TTL_SECONDS` is appropriate (default: 3600)
+4. Monitor logs for cache HIT vs MISS messages
+
+**Redis connection errors:**
+1. Ensure both services (API + Redis) are in same Railway project
+2. Check Redis service logs for errors
+3. Restart Redis service if needed
+4. Verify network connectivity between services
 
 ## Auto-Deployment
 

@@ -11,6 +11,9 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import uvicorn
 
+# Import caching utilities
+from cache import get_cache, cached
+
 # Load environment variables from .env file
 try:
     from load_env import load_env_file
@@ -59,10 +62,20 @@ async def lifespan(app: FastAPI):
     print(f"[{datetime.now()}] ========================================")
     print(f"[{datetime.now()}] Available endpoints:")
     print(f"[{datetime.now()}]   - GET  /health")
+    print(f"[{datetime.now()}]   - GET  /cache/stats")
+    print(f"[{datetime.now()}]   - POST /cache/clear")
     print(f"[{datetime.now()}]   - POST /video-data")
     print(f"[{datetime.now()}]   - POST /video-captions")
     print(f"[{datetime.now()}]   - POST /video-timestamps")
     print(f"[{datetime.now()}]   - POST /video-transcript-languages")
+
+    # Initialize cache
+    cache = get_cache()
+    cache_status = "enabled" if cache.enabled else "disabled"
+    print(f"[{datetime.now()}] Cache Status: Redis {cache_status}")
+    if cache.enabled:
+        print(f"[{datetime.now()}] Cache TTL: {cache.cache_ttl} seconds")
+
     proxy_status = "enabled" if WEBSHARE_PROXY_CONFIG else "disabled"
     print(f"[{datetime.now()}] Proxy Status: Webshare proxy {proxy_status}")
     print(f"[{datetime.now()}] Parallel Processing: Enabled with asyncio.to_thread()")
@@ -111,6 +124,7 @@ class YouTubeTools:
         return None
 
     @staticmethod
+    @cached(prefix="video_data", ttl=3600)
     def get_video_data(url: str) -> dict:
         """Function to get video data from a YouTube URL."""
         print(f"[{datetime.now()}] get_video_data called with URL: {url}")
@@ -198,6 +212,7 @@ class YouTubeTools:
                 return fetched_transcript, available_languages
 
     @staticmethod
+    @cached(prefix="video_captions", ttl=3600)
     async def get_video_captions(url: str, languages: Optional[List[str]] = None) -> str:
         """Get captions from a YouTube video using the new API."""
         print(f"[{datetime.now()}] get_video_captions called with URL: {url}, languages: {languages}")
@@ -243,6 +258,7 @@ class YouTubeTools:
             raise HTTPException(status_code=500, detail=f"Error getting captions for video: {str(e)}")
 
     @staticmethod
+    @cached(prefix="video_timestamps", ttl=3600)
     async def get_video_timestamps(url: str, languages: Optional[List[str]] = None) -> List[str]:
         """Generate timestamps for a YouTube video based on captions using the new API."""
         print(f"[{datetime.now()}] get_video_timestamps called with URL: {url}, languages: {languages}")
@@ -290,6 +306,7 @@ class YouTubeTools:
             raise HTTPException(status_code=500, detail=f"Error generating timestamps: {str(e)}")
 
     @staticmethod
+    @cached(prefix="video_languages", ttl=3600)
     async def get_video_transcript_languages(url: str) -> List[dict]:
         """List available transcript languages for a video."""
         print(f"[{datetime.now()}] get_video_transcript_languages called with URL: {url}")
@@ -388,12 +405,43 @@ async def health_check():
     proxy_status = "enabled" if WEBSHARE_PROXY_CONFIG else "disabled"
     proxy_username = os.getenv("WEBSHARE_PROXY_USERNAME", "not_set")
 
+    cache = get_cache()
+    cache_status = "enabled" if cache.enabled else "disabled"
+
     return {
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
         "proxy_status": f"webshare_{proxy_status}",
         "proxy_username": proxy_username if WEBSHARE_PROXY_CONFIG else None,
+        "cache_status": f"redis_{cache_status}",
+        "cache_ttl_seconds": cache.cache_ttl if cache.enabled else None,
         "parallel_processing": "enabled"
+    }
+
+@app.get("/cache/stats")
+async def cache_stats():
+    """Get cache statistics"""
+    print(f"[{datetime.now()}] GET /cache/stats endpoint called")
+    cache = get_cache()
+    return cache.get_stats()
+
+@app.post("/cache/clear")
+async def cache_clear():
+    """Clear all cached data"""
+    print(f"[{datetime.now()}] POST /cache/clear endpoint called")
+    cache = get_cache()
+
+    if not cache.enabled:
+        return {
+            "success": False,
+            "message": "Cache is not enabled"
+        }
+
+    success = cache.clear_all()
+    return {
+        "success": success,
+        "message": "Cache cleared successfully" if success else "Failed to clear cache",
+        "timestamp": datetime.now().isoformat()
     }
 
 @app.get("/")
@@ -405,10 +453,12 @@ async def root():
         "endpoints": {
             "GET /": "This info",
             "GET /health": "Health check",
-            "POST /video-data": "Get video metadata",
-            "POST /video-captions": "Get video captions/transcripts",
-            "POST /video-timestamps": "Get timestamped transcripts",
-            "POST /video-transcript-languages": "List available languages"
+            "GET /cache/stats": "Cache statistics",
+            "POST /cache/clear": "Clear cache",
+            "POST /video-data": "Get video metadata (cached)",
+            "POST /video-captions": "Get video captions/transcripts (cached)",
+            "POST /video-timestamps": "Get timestamped transcripts (cached)",
+            "POST /video-transcript-languages": "List available languages (cached)"
         },
         "docs": "/docs"
     }

@@ -24,7 +24,11 @@
       "mcp__plugin_context7_context7__resolve-library-id",
       "mcp__plugin_context7_context7__get-library-docs",
       "Bash(railway variables:*)",
-      "Bash(railway domain --help:*)"
+      "Bash(railway domain --help:*)",
+      "Bash(railway domain:*)",
+      "Bash(uv run:*)",
+      "Bash(railway add --help:*)",
+      "Bash(railway add:*)"
     ]
   }
 }

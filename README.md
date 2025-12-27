@@ -9,10 +9,12 @@ A FastAPI-based server that provides convenient endpoints for extracting informa
 - Generate timestamped transcripts
 - List available transcript languages for videos
 - Support for multiple languages in captions
+- **Redis caching layer** for improved performance and reduced API calls
 - Webshare proxy integration to avoid IP blocking
 - Async processing with parallel execution
 - Clean and RESTful API design
 - Comprehensive error handling
+- Cache management endpoints for monitoring and control
 
 ## Quick Deploy to Railway
 
@@ -44,14 +46,29 @@ uv sync
 
 ### Environment Variables
 
-The server supports optional proxy configuration to avoid YouTube's IP blocking:
+The server supports the following configuration options:
 
+**Proxy Configuration (Optional):**
 - `WEBSHARE_PROXY_USERNAME` - Your Webshare proxy username (optional)
 - `WEBSHARE_PROXY_PASSWORD` - Your Webshare proxy password (optional)
+
+**Redis Caching (Optional but Recommended):**
+- `REDIS_URL` - Redis connection URL (e.g., `redis://localhost:6379`)
+- `CACHE_TTL_SECONDS` - Cache expiration time in seconds (default: 3600)
+
+**Server Configuration:**
 - `HOST` - Server host (default: 0.0.0.0)
 - `PORT` - Server port (default: 8000)
 
-You can set these in your environment or create a `.env` file in the project root.
+You can set these in your environment or create a `.env` file in the project root. See [.env.example](.env.example) for a template.
+
+### Redis Caching Setup
+
+Redis caching dramatically improves performance by caching YouTube API responses. See the [Redis Setup Guide](REDIS_SETUP.md) for:
+- Local development setup with Docker or native Redis
+- Railway deployment with managed Redis
+- Cache configuration and monitoring
+- Performance optimization tips
 
 ### Check Environment Setup
 
@@ -88,9 +105,53 @@ uv run main.py
 GET /health
 ```
 
-**Response:** Server status, proxy configuration, and system information.
+**Response:** Server status, proxy configuration, cache status, and system information.
 
-### 2. Get Video Metadata
+```json
+{
+  "status": "healthy",
+  "timestamp": "2024-01-15T10:30:00.000Z",
+  "proxy_status": "webshare_enabled",
+  "cache_status": "redis_enabled",
+  "cache_ttl_seconds": 3600,
+  "parallel_processing": "enabled"
+}
+```
+
+### 2. Cache Statistics
+```http
+GET /cache/stats
+```
+
+**Response:** Redis cache performance metrics.
+
+```json
+{
+  "enabled": true,
+  "status": "connected",
+  "total_keys": 42,
+  "ttl_seconds": 3600,
+  "keyspace_hits": 156,
+  "keyspace_misses": 42
+}
+```
+
+### 3. Clear Cache
+```http
+POST /cache/clear
+```
+
+**Response:** Clears all cached data.
+
+```json
+{
+  "success": true,
+  "message": "Cache cleared successfully",
+  "timestamp": "2024-01-15T10:30:00.000Z"
+}
+```
+
+### 4. Get Video Metadata (Cached)
 ```http
 POST /video-data
 ```
@@ -104,7 +165,7 @@ POST /video-data
 
 **Response:** Video metadata including title, author, thumbnails, duration, etc.
 
-### 3. List Available Transcript Languages
+### 5. List Available Transcript Languages (Cached)
 ```http
 POST /video-transcript-languages
 ```
@@ -118,7 +179,7 @@ POST /video-transcript-languages
 
 **Response:** List of available transcript languages with details about generated vs manual transcripts.
 
-### 4. Get Video Captions
+### 6. Get Video Captions (Cached)
 ```http
 POST /video-captions
 ```
@@ -133,7 +194,7 @@ POST /video-captions
 
 **Response:** Complete transcript text of the video with automatic language fallback.
 
-### 5. Get Video Timestamps
+### 7. Get Video Timestamps (Cached)
 ```http
 POST /video-timestamps
 ```
