@@ -120,6 +120,76 @@ curl -X POST https://transcript.youtubesummaries.cc/video-timestamps \
 
 ---
 
+---
+
+## 🤖 AI-Powered Endpoints (New!)
+
+### 6️⃣ Generate Video Notes
+```bash
+curl -X POST https://transcript.youtubesummaries.cc/video-notes \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://www.youtube.com/watch?v=VIDEO_ID",
+    "format": "structured"
+  }'
+```
+
+**Format options:** `"structured"`, `"summary"`, `"detailed"`
+
+**Response:**
+```json
+{
+  "video_title": "Video Title",
+  "channel": "Channel Name",
+  "format": "structured",
+  "notes": "# Overview\n\nThis video covers...\n\n## Main Topics\n...",
+  "word_count": 427,
+  "timestamp": "2025-12-27T01:30:00"
+}
+```
+
+**Performance:**
+- First request: ~5-15 seconds
+- Cost: ~$0.03-0.10 per video
+
+---
+
+### 7️⃣ Translate Video Transcript
+```bash
+curl -X POST https://transcript.youtubesummaries.cc/video-translate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://www.youtube.com/watch?v=VIDEO_ID",
+    "target_language": "Spanish"
+  }'
+```
+
+**Supported languages:** Spanish, French, German, Japanese, Korean, Chinese, Arabic, and many more!
+
+**Response:**
+```json
+{
+  "video_title": "Video Title",
+  "channel": "Channel Name",
+  "target_language": "Spanish",
+  "translated_transcript": "Texto traducido aquí...",
+  "translated_timestamps": [
+    "0:00 - Texto traducido",
+    "0:15 - Más texto traducido"
+  ],
+  "word_count": 342,
+  "note": "Use with ElevenLabs for voice dubbing"
+}
+```
+
+**Performance:**
+- First request: ~10-25 seconds
+- Cost: ~$0.05-0.15 per video
+
+**💡 Pro tip:** Use translated transcript with ElevenLabs voice cloning to create dubbed videos!
+
+---
+
 ## ⚡ Cache Endpoints
 
 ### Check Cache Status

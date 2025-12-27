@@ -2,6 +2,45 @@
 
 All notable changes to the YouTube API Server project.
 
+## [1.1.0] - 2025-12-27
+
+### Added - AI-Powered Features 🤖
+
+- **POST /video-notes** - Generate structured notes, summaries, or detailed outlines from video transcripts
+  - Three format options: `structured`, `summary`, `detailed`
+  - Powered by Claude 3.5 Sonnet (Anthropic)
+  - Returns markdown-formatted notes
+  - ~5-15 second response time
+  - Cost: $0.03-0.10 per video
+
+- **POST /video-translate** - Translate video transcripts to any language
+  - Support for 50+ languages
+  - Translates both full transcript and timestamps
+  - Powered by Claude 3.5 Sonnet + Haiku
+  - Perfect for creating dubbed content with ElevenLabs
+  - ~10-25 second response time
+  - Cost: $0.05-0.15 per video
+
+### Infrastructure
+
+- Added `anthropic==0.39.0` dependency
+- Graceful degradation when `ANTHROPIC_API_KEY` not configured
+- AI features status visible in root endpoint and health check
+- Comprehensive error handling for API failures
+
+### Documentation
+
+- **AI_FEATURES.md** - Complete guide to AI-powered endpoints
+- **test_new_endpoints.sh** - Testing script for new features
+- Updated API_QUICK_REFERENCE.md with new endpoints
+- Added ElevenLabs integration workflow
+
+### Use Cases Enabled
+
+1. **YouTube-to-Notes App** - Convert videos to study notes
+2. **Video Translation Tool** - Translate + dub videos with AI voices
+3. **Chapter Generator** - Auto-generate video chapters
+
 ## [Unreleased] - 2025-12-26
 
 ### Added - Enhanced URL Support

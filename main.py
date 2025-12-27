@@ -10,6 +10,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import uvicorn
+from anthropic import Anthropic
 
 # Import caching utilities
 from cache import get_cache, cached
@@ -54,6 +55,21 @@ def get_webshare_config():
 
 WEBSHARE_PROXY_CONFIG = get_webshare_config()
 
+# Initialize Anthropic client for LLM features
+def get_anthropic_client():
+    """Get Anthropic API client from environment variables."""
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+
+    if not api_key:
+        print(f"[{datetime.now()}] WARNING: Anthropic API key not found in environment variables")
+        print(f"[{datetime.now()}] Set ANTHROPIC_API_KEY to enable /video-notes and /video-translate endpoints")
+        return None
+
+    print(f"[{datetime.now()}] Anthropic API client initialized")
+    return Anthropic(api_key=api_key)
+
+ANTHROPIC_CLIENT = get_anthropic_client()
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
@@ -68,6 +84,8 @@ async def lifespan(app: FastAPI):
     print(f"[{datetime.now()}]   - POST /video-captions")
     print(f"[{datetime.now()}]   - POST /video-timestamps")
     print(f"[{datetime.now()}]   - POST /video-transcript-languages")
+    print(f"[{datetime.now()}]   - POST /video-notes (requires ANTHROPIC_API_KEY)")
+    print(f"[{datetime.now()}]   - POST /video-translate (requires ANTHROPIC_API_KEY)")
 
     # Initialize cache
     cache = get_cache()
@@ -414,6 +432,16 @@ class YouTubeRequest(BaseModel):
     url: str
     languages: Optional[List[str]] = None
 
+class VideoNotesRequest(BaseModel):
+    url: str
+    languages: Optional[List[str]] = None
+    format: Optional[str] = "structured"  # structured, summary, or detailed
+
+class VideoTranslateRequest(BaseModel):
+    url: str
+    target_language: str  # e.g., "Spanish", "French", "Japanese"
+    source_languages: Optional[List[str]] = None
+
 @app.post("/video-data")
 async def get_video_data(request: YouTubeRequest):
     """Endpoint to get video metadata"""
@@ -501,12 +529,220 @@ async def cache_clear():
         "timestamp": datetime.now().isoformat()
     }
 
+@app.post("/video-notes")
+async def generate_video_notes(request: VideoNotesRequest):
+    """Generate structured notes from a YouTube video transcript"""
+    print(f"[{datetime.now()}] POST /video-notes endpoint called")
+    print(f"[{datetime.now()}] Request data: url={request.url}, format={request.format}")
+
+    if not ANTHROPIC_CLIENT:
+        raise HTTPException(
+            status_code=503,
+            detail="AI features not available. Please configure ANTHROPIC_API_KEY environment variable."
+        )
+
+    try:
+        # Get video metadata
+        video_data = YouTubeTools.get_video_data(request.url)
+
+        # Get transcript
+        captions = await YouTubeTools.get_video_captions(request.url, request.languages)
+
+        # Get timestamps for context
+        timestamps = await YouTubeTools.get_video_timestamps(request.url, request.languages)
+
+        print(f"[{datetime.now()}] Generating notes with Claude API...")
+
+        # Create prompt based on format
+        if request.format == "summary":
+            prompt = f"""Create a concise summary of this YouTube video.
+
+Video Title: {video_data.get('title')}
+Channel: {video_data.get('author_name')}
+
+Transcript:
+{captions}
+
+Provide:
+1. A 2-3 sentence executive summary
+2. 3-5 key takeaways as bullet points
+3. Main topics covered
+
+Format the response in clean markdown."""
+
+        elif request.format == "detailed":
+            prompt = f"""Create detailed notes from this YouTube video transcript.
+
+Video Title: {video_data.get('title')}
+Channel: {video_data.get('author_name')}
+
+Transcript:
+{captions}
+
+Provide:
+1. Executive Summary (3-4 sentences)
+2. Detailed outline with main sections and subsections
+3. Key concepts explained
+4. Important quotes or statements
+5. Action items or recommendations (if applicable)
+
+Format the response in clean markdown with proper headings."""
+
+        else:  # structured (default)
+            prompt = f"""Convert this YouTube video transcript into well-structured notes.
+
+Video Title: {video_data.get('title')}
+Channel: {video_data.get('author_name')}
+
+Transcript:
+{captions}
+
+Create structured notes with:
+1. Overview: Brief description of video content
+2. Main Topics: Organized by sections with key points
+3. Key Takeaways: Most important information
+4. Conclusion: Final thoughts or summary
+
+Format the response in clean markdown with proper headings and bullet points."""
+
+        # Call Claude API
+        message = ANTHROPIC_CLIENT.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=4000,
+            messages=[{
+                "role": "user",
+                "content": prompt
+            }]
+        )
+
+        notes = message.content[0].text
+
+        print(f"[{datetime.now()}] Notes generated successfully ({len(notes)} characters)")
+
+        return {
+            "video_title": video_data.get('title'),
+            "channel": video_data.get('author_name'),
+            "format": request.format,
+            "notes": notes,
+            "word_count": len(notes.split()),
+            "timestamp": datetime.now().isoformat()
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[{datetime.now()}] ERROR: Exception while generating notes: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error generating notes: {str(e)}")
+
+@app.post("/video-translate")
+async def translate_video_transcript(request: VideoTranslateRequest):
+    """Translate a YouTube video transcript to another language"""
+    print(f"[{datetime.now()}] POST /video-translate endpoint called")
+    print(f"[{datetime.now()}] Request data: url={request.url}, target_language={request.target_language}")
+
+    if not ANTHROPIC_CLIENT:
+        raise HTTPException(
+            status_code=503,
+            detail="AI features not available. Please configure ANTHROPIC_API_KEY environment variable."
+        )
+
+    try:
+        # Get video metadata
+        video_data = YouTubeTools.get_video_data(request.url)
+
+        # Get transcript
+        captions = await YouTubeTools.get_video_captions(request.url, request.source_languages)
+
+        # Get timestamps for alignment
+        timestamps = await YouTubeTools.get_video_timestamps(request.url, request.source_languages)
+
+        print(f"[{datetime.now()}] Translating transcript to {request.target_language} with Claude API...")
+
+        prompt = f"""Translate this YouTube video transcript to {request.target_language}.
+
+Video Title: {video_data.get('title')}
+Channel: {video_data.get('author_name')}
+
+Original Transcript:
+{captions}
+
+Requirements:
+1. Translate the entire transcript naturally and accurately
+2. Maintain the original tone and style
+3. Preserve technical terms appropriately
+4. Keep the translation conversational as if spoken
+5. Do not add explanations or notes - only provide the translation
+
+Provide ONLY the translated transcript, nothing else."""
+
+        # Call Claude API
+        message = ANTHROPIC_CLIENT.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=8000,
+            messages=[{
+                "role": "user",
+                "content": prompt
+            }]
+        )
+
+        translated_text = message.content[0].text
+
+        # Also translate timestamps
+        print(f"[{datetime.now()}] Translating timestamps...")
+
+        # Sample first 20 timestamps for translation (to keep costs reasonable)
+        sample_timestamps = timestamps[:20] if len(timestamps) > 20 else timestamps
+        timestamps_text = "\n".join(sample_timestamps)
+
+        timestamp_prompt = f"""Translate these video timestamps to {request.target_language}.
+
+Original Timestamps:
+{timestamps_text}
+
+Requirements:
+1. Keep the timestamp format (MM:SS - text)
+2. Only translate the text part, not the timestamps
+3. Maintain natural speech patterns
+4. Provide ONLY the translated timestamps, one per line
+
+Translated timestamps:"""
+
+        timestamp_message = ANTHROPIC_CLIENT.messages.create(
+            model="claude-3-5-haiku-20241022",  # Use Haiku for faster/cheaper timestamp translation
+            max_tokens=2000,
+            messages=[{
+                "role": "user",
+                "content": timestamp_prompt
+            }]
+        )
+
+        translated_timestamps = timestamp_message.content[0].text.strip().split('\n')
+
+        print(f"[{datetime.now()}] Translation completed successfully")
+
+        return {
+            "video_title": video_data.get('title'),
+            "channel": video_data.get('author_name'),
+            "target_language": request.target_language,
+            "translated_transcript": translated_text,
+            "translated_timestamps": translated_timestamps,
+            "word_count": len(translated_text.split()),
+            "timestamp": datetime.now().isoformat(),
+            "note": "Use this translated transcript with ElevenLabs voice cloning for dubbed audio"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[{datetime.now()}] ERROR: Exception while translating transcript: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error translating transcript: {str(e)}")
+
 @app.get("/")
 async def root():
     """Root endpoint with API information"""
     return {
         "name": "YouTube Tools API",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "endpoints": {
             "GET /": "This info",
             "GET /health": "Health check",
@@ -515,9 +751,12 @@ async def root():
             "POST /video-data": "Get video metadata (cached)",
             "POST /video-captions": "Get video captions/transcripts (cached)",
             "POST /video-timestamps": "Get timestamped transcripts (cached)",
-            "POST /video-transcript-languages": "List available languages (cached)"
+            "POST /video-transcript-languages": "List available languages (cached)",
+            "POST /video-notes": "Generate structured notes from video (requires ANTHROPIC_API_KEY)",
+            "POST /video-translate": "Translate video transcript (requires ANTHROPIC_API_KEY)"
         },
-        "docs": "/docs"
+        "docs": "/docs",
+        "ai_features_available": ANTHROPIC_CLIENT is not None
     }
 
 if __name__ == "__main__":

@@ -4,21 +4,33 @@ A FastAPI-based server that provides convenient endpoints for extracting informa
 
 ## Features
 
+### Core Video Extraction
 - Get video metadata (title, author, thumbnails, etc.)
 - Extract video captions/transcripts with language fallback
 - Generate timestamped transcripts
 - List available transcript languages for videos
-- Support for multiple languages in captions
-- **Redis caching layer** for improved performance and reduced API calls
+- Support for 20+ YouTube URL formats including Shorts, Live, Mobile, Music
+- Support for direct video IDs (just pass `"dQw4w9WgXcQ"`)
+
+### AI-Powered Features 🤖 (New!)
+- **Generate structured notes** from video transcripts (summary, structured, or detailed)
+- **Translate transcripts** to 50+ languages with AI
+- Perfect for building YouTube video translation tools with ElevenLabs voice dubbing
+- Powered by Claude 3.5 (Anthropic)
+
+### Performance & Infrastructure
+- **Redis caching layer** for 10-56x performance boost on video data
 - Webshare proxy integration to avoid IP blocking
 - Async processing with parallel execution
 - Clean and RESTful API design
 - Comprehensive error handling
 - Cache management endpoints for monitoring and control
+- Graceful degradation when optional features unavailable
 
 ## Quick Links
 
 - 🚀 **[API Quick Reference](API_QUICK_REFERENCE.md)** - Fast copy-paste examples for frontend developers
+- 🤖 **[AI Features Guide](AI_FEATURES.md)** - Video notes & translation with Claude AI (New!)
 - 📘 **[Frontend Integration Guide](FRONTEND_INTEGRATION.md)** - Complete React, Vue, Next.js examples
 - 🎯 **[Quick Start](QUICK_START.md)** - Get started in 2 minutes
 - 📊 **[Redis Setup](REDIS_SETUP.md)** - Enable caching for 10-56x performance boost
@@ -62,6 +74,9 @@ The server supports the following configuration options:
 **Redis Caching (Optional but Recommended):**
 - `REDIS_URL` - Redis connection URL (e.g., `redis://localhost:6379`)
 - `CACHE_TTL_SECONDS` - Cache expiration time in seconds (default: 3600)
+
+**AI Features (Optional):**
+- `ANTHROPIC_API_KEY` - Anthropic API key for /video-notes and /video-translate endpoints
 
 **Server Configuration:**
 - `HOST` - Server host (default: 0.0.0.0)
