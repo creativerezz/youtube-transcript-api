@@ -32,7 +32,8 @@
       "Bash(time curl -s -X POST https://transcript.youtubesummaries.cc/video-data )",
       "Bash(railway logs:*)",
       "Bash(time curl -s -X POST https://transcript.youtubesummaries.cc/video-captions -H \"Content-Type: application/json\" -d '{\"\"url\"\": \"\"https://www.youtube.com/watch?v=dQw4w9WgXcQ\"\"}')",
-      "Bash(timeout 5 uv run:*)"
+      "Bash(timeout 5 uv run:*)",
+      "Bash(grep:*)"
     ]
   }
 }
