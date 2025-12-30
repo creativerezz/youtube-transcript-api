@@ -8,7 +8,7 @@ All notable changes to the YouTube API Server project.
 
 - **POST /video-notes** - Generate structured notes, summaries, or detailed outlines from video transcripts
   - Three format options: `structured`, `summary`, `detailed`
-  - Powered by Claude 3.5 Sonnet (Anthropic)
+  - Powered by Claude 3.5 Sonnet via OpenRouter
   - Returns markdown-formatted notes
   - ~5-15 second response time
   - Cost: $0.03-0.10 per video
@@ -23,8 +23,8 @@ All notable changes to the YouTube API Server project.
 
 ### Infrastructure
 
-- Added `anthropic==0.39.0` dependency
-- Graceful degradation when `ANTHROPIC_API_KEY` not configured
+- Added `openai>=1.0.0` dependency (for OpenRouter integration)
+- Graceful degradation when `OPENROUTER_API_KEY` not configured
 - AI features status visible in root endpoint and health check
 - Comprehensive error handling for API failures
 

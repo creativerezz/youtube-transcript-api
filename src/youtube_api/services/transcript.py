@@ -125,6 +125,25 @@ class TranscriptService:
 
             caption_text = " ".join(snippet.text for snippet in transcript)
             logger.debug("captions_combined", char_count=len(caption_text))
+            
+            # Auto-save transcript to persistent storage if enabled
+            try:
+                from .storage import get_storage
+                storage = get_storage()
+                if storage.enabled:
+                    # Save in background (fire and forget)
+                    asyncio.create_task(
+                        asyncio.to_thread(
+                            storage.save_transcript,
+                            video_id,
+                            caption_text,
+                            transcript.language_code,
+                        )
+                    )
+            except Exception as e:
+                # Don't fail the request if storage fails
+                logger.debug("auto_save_failed", video_id=video_id, error=str(e))
+            
             return caption_text
 
         except Exception as e:

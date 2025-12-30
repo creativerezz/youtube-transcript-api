@@ -16,7 +16,7 @@ A FastAPI-based server that provides convenient endpoints for extracting informa
 - **Generate structured notes** from video transcripts (summary, structured, or detailed)
 - **Translate transcripts** to 50+ languages with AI
 - Perfect for building YouTube video translation tools with ElevenLabs voice dubbing
-- Powered by Claude 3.5 (Anthropic)
+- Powered by OpenRouter (Claude 3.5 via OpenRouter)
 
 ### Performance & Infrastructure
 - **Redis caching layer** for 10-56x performance boost on video data
@@ -76,7 +76,7 @@ The server supports the following configuration options:
 - `CACHE_TTL_SECONDS` - Cache expiration time in seconds (default: 3600)
 
 **AI Features (Optional):**
-- `ANTHROPIC_API_KEY` - Anthropic API key for /video-notes and /video-translate endpoints
+- `OPENROUTER_API_KEY` - OpenRouter API key for /video-notes and /video-translate endpoints
 
 **Server Configuration:**
 - `HOST` - Server host (default: 0.0.0.0)

@@ -2,13 +2,13 @@
 
 from typing import Optional
 
-from anthropic import Anthropic
+from openai import OpenAI
 from fastapi import Request
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
 from .config import Settings, get_settings
-from .services.ai import get_anthropic_client
+from .services.ai import get_openrouter_client
 from .services.cache import RedisCache, get_cache
 
 # Rate limiter instance
@@ -25,9 +25,9 @@ def get_cache_dep() -> RedisCache:
     return get_cache()
 
 
-def get_anthropic_dep() -> Optional[Anthropic]:
-    """Dependency for getting Anthropic client."""
-    return get_anthropic_client()
+def get_openrouter_dep() -> Optional[OpenAI]:
+    """Dependency for getting OpenRouter client."""
+    return get_openrouter_client()
 
 
 async def get_rate_limiter(request: Request) -> Limiter:

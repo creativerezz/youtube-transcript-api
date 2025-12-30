@@ -6,7 +6,7 @@ from typing import Dict
 from fastapi import APIRouter, Depends, Request
 import structlog
 
-from ..dependencies import get_anthropic_dep, limiter
+from ..dependencies import get_openrouter_dep, limiter
 from ..exceptions import AIServiceUnavailableError, InvalidURLError, TranscriptNotFoundError
 from ..models.requests import VideoNotesRequest, VideoTranslateRequest
 from ..models.responses import NotesResponse, TranslationResponse
@@ -23,17 +23,17 @@ router = APIRouter()
 async def generate_video_notes(
     request: Request,
     body: VideoNotesRequest,
-    anthropic=Depends(get_anthropic_dep),
+    openrouter=Depends(get_openrouter_dep),
 ) -> Dict:
     """
     Generate structured notes from a YouTube video transcript.
 
-    Requires ANTHROPIC_API_KEY to be configured.
+    Requires OPENROUTER_API_KEY to be configured.
     Supports three formats: structured (default), summary, detailed.
     """
     logger.info("video_notes_request", url=body.url, format=body.format)
 
-    if not anthropic:
+    if not openrouter:
         raise AIServiceUnavailableError().to_http_exception()
 
     try:
@@ -71,12 +71,12 @@ async def generate_video_notes(
 async def translate_video_transcript(
     request: Request,
     body: VideoTranslateRequest,
-    anthropic=Depends(get_anthropic_dep),
+    openrouter=Depends(get_openrouter_dep),
 ) -> Dict:
     """
     Translate a YouTube video transcript to another language.
 
-    Requires ANTHROPIC_API_KEY to be configured.
+    Requires OPENROUTER_API_KEY to be configured.
     Supports 50+ languages.
     """
     logger.info(
@@ -85,7 +85,7 @@ async def translate_video_transcript(
         target_language=body.target_language,
     )
 
-    if not anthropic:
+    if not openrouter:
         raise AIServiceUnavailableError().to_http_exception()
 
     try:

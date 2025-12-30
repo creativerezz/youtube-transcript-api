@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends
 import structlog
 
 from ..config import Settings, get_settings
-from ..dependencies import get_cache_dep, get_anthropic_dep
+from ..dependencies import get_cache_dep, get_openrouter_dep
 from ..models.responses import (
     APIInfoResponse,
     CacheClearResponse,
@@ -21,7 +21,7 @@ router = APIRouter()
 
 
 @router.get("/", response_model=APIInfoResponse)
-async def root(anthropic=Depends(get_anthropic_dep)) -> Dict:
+async def root(openrouter=Depends(get_openrouter_dep)) -> Dict:
     """Root endpoint with API information."""
     return {
         "name": "YouTube Tools API",
@@ -35,11 +35,16 @@ async def root(anthropic=Depends(get_anthropic_dep)) -> Dict:
             "POST /video-captions": "Get video captions/transcripts (cached)",
             "POST /video-timestamps": "Get timestamped transcripts (cached)",
             "POST /video-transcript-languages": "List available languages (cached)",
-            "POST /video-notes": "Generate structured notes from video (requires ANTHROPIC_API_KEY)",
-            "POST /video-translate": "Translate video transcript (requires ANTHROPIC_API_KEY)",
+            "POST /video-notes": "Generate structured notes from video (requires OPENROUTER_API_KEY)",
+            "POST /video-translate": "Translate video transcript (requires OPENROUTER_API_KEY)",
+            "POST /transcripts/save": "Save transcript to persistent storage",
+            "POST /transcripts/get": "Retrieve stored transcript",
+            "GET /transcripts/list": "List all stored transcripts",
+            "POST /transcripts/delete": "Delete stored transcript",
+            "GET /transcripts/stats": "Get storage statistics",
         },
         "docs": "/docs",
-        "ai_features_available": anthropic is not None,
+        "ai_features_available": openrouter is not None,
     }
 
 

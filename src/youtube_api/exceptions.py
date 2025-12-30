@@ -53,11 +53,11 @@ class RateLimitError(YouTubeAPIError):
 
 
 class AIServiceUnavailableError(YouTubeAPIError):
-    """AI service (Anthropic) is not configured or unavailable."""
+    """AI service (OpenRouter) is not configured or unavailable."""
 
     def __init__(
         self,
-        message: str = "AI features not available. Please configure ANTHROPIC_API_KEY.",
+        message: str = "AI features not available. Please configure OPENROUTER_API_KEY.",
     ):
         super().__init__(message, status.HTTP_503_SERVICE_UNAVAILABLE)
 

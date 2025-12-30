@@ -21,7 +21,7 @@ Translate YouTube video transcripts to 50+ languages:
 
 ### Dependencies Added
 ```toml
-anthropic==0.39.0  # Claude AI for note generation and translation
+openai>=1.0.0  # OpenAI SDK for OpenRouter integration (Claude AI)
 ```
 
 ### New Request Models
@@ -48,7 +48,7 @@ class VideoTranslateRequest(BaseModel):
   - Reason: Faster and cheaper for smaller tasks
 
 ### Graceful Degradation
-- Server works without `ANTHROPIC_API_KEY`
+- Server works without `OPENROUTER_API_KEY`
 - Returns 503 with clear error message when AI features unavailable
 - Status visible in `GET /` and `GET /health` endpoints
 
@@ -56,17 +56,17 @@ class VideoTranslateRequest(BaseModel):
 
 ### Core Implementation
 1. **main.py**
-   - Added Anthropic client initialization
+   - Added OpenRouter client initialization
    - Implemented `/video-notes` endpoint
    - Implemented `/video-translate` endpoint
    - Updated root endpoint to show AI features status
    - Updated lifespan logging
 
 2. **pyproject.toml**
-   - Added `anthropic==0.39.0` dependency
+   - Added `openai>=1.0.0` dependency
 
 3. **.env.example**
-   - Added `ANTHROPIC_API_KEY` configuration section
+   - Added `OPENROUTER_API_KEY` configuration section
 
 ### Documentation
 4. **AI_FEATURES.md** (NEW)
@@ -104,7 +104,7 @@ class VideoTranslateRequest(BaseModel):
 | `/video-notes` | 5-15 seconds | Fetches transcript + AI processing |
 | `/video-translate` | 10-25 seconds | Fetches transcript + 2 AI calls (transcript + timestamps) |
 
-### Cost Estimates (Anthropic Pricing)
+### Cost Estimates (OpenRouter Pricing)
 | Video Length | Notes Cost | Translation Cost |
 |--------------|------------|------------------|
 | 5 minutes    | ~$0.01     | ~$0.02           |
@@ -198,27 +198,27 @@ curl -X POST https://transcript.youtubesummaries.cc/video-translate \
 ### Railway Deployment
 1. Add environment variable in Railway dashboard:
    ```
-   ANTHROPIC_API_KEY=sk-ant-api03-...
+   OPENROUTER_API_KEY=sk-or-v1-...
    ```
 
 2. Service will auto-redeploy
 
 3. Verify in logs:
    ```
-   [timestamp] Anthropic API client initialized ✅
-   [timestamp]   - POST /video-notes (requires ANTHROPIC_API_KEY)
-   [timestamp]   - POST /video-translate (requires ANTHROPIC_API_KEY)
+   [timestamp] OpenRouter API client initialized ✅
+   [timestamp]   - POST /video-notes (requires OPENROUTER_API_KEY)
+   [timestamp]   - POST /video-translate (requires OPENROUTER_API_KEY)
    ```
 
 ### Optional: Monitor Usage
-- Check Anthropic console for API usage
+- Check OpenRouter dashboard for API usage
 - Set up billing alerts
 - Monitor costs per endpoint
 
 ## Next Steps
 
 ### Immediate
-1. Get Anthropic API key from https://console.anthropic.com/
+1. Get OpenRouter API key from https://openrouter.ai/
 2. Test endpoints with real videos
 3. Deploy to Railway with API key configured
 

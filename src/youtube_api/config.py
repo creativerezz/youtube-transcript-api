@@ -28,8 +28,8 @@ class Settings(BaseSettings):
     webshare_proxy_username: Optional[str] = None
     webshare_proxy_password: Optional[str] = None
 
-    # Anthropic API configuration
-    anthropic_api_key: Optional[str] = None
+    # OpenRouter API configuration
+    openrouter_api_key: Optional[str] = None
 
     # Logging configuration
     log_level: str = "INFO"
@@ -45,9 +45,9 @@ class Settings(BaseSettings):
         return bool(self.webshare_proxy_username and self.webshare_proxy_password)
 
     @property
-    def has_anthropic_config(self) -> bool:
-        """Check if Anthropic API is configured."""
-        return bool(self.anthropic_api_key)
+    def has_openrouter_config(self) -> bool:
+        """Check if OpenRouter API is configured."""
+        return bool(self.openrouter_api_key)
 
     @property
     def has_redis_config(self) -> bool:

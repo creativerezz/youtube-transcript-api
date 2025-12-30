@@ -41,3 +41,17 @@ class VideoTranslateRequest(BaseModel):
         default=None,
         description="Preferred source transcript languages",
     )
+
+
+class SaveTranscriptRequest(BaseModel):
+    """Request model for saving a transcript."""
+
+    url: str = Field(..., description="YouTube URL or video ID")
+    languages: Optional[List[str]] = Field(
+        default=None,
+        description="Preferred transcript languages",
+    )
+    auto_save: bool = Field(
+        default=True,
+        description="Automatically save transcripts when fetched",
+    )

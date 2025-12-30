@@ -1,41 +1,47 @@
-"""AI service for video notes and translation using Anthropic Claude."""
+"""AI service for video notes and translation using OpenRouter."""
 
 from typing import List, Literal, Optional
 
 import structlog
-from anthropic import Anthropic
+from openai import OpenAI
 
 from ..config import get_settings
 from ..exceptions import AIServiceUnavailableError
 
 logger = structlog.get_logger(__name__)
 
-# Cached Anthropic client
-_anthropic_client: Optional[Anthropic] = None
+# Cached OpenRouter client
+_openrouter_client: Optional[OpenAI] = None
 _client_loaded: bool = False
 
+# OpenRouter API endpoint
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
-def get_anthropic_client() -> Optional[Anthropic]:
-    """Get Anthropic client from settings."""
-    global _anthropic_client, _client_loaded
+
+def get_openrouter_client() -> Optional[OpenAI]:
+    """Get OpenRouter client from settings."""
+    global _openrouter_client, _client_loaded
 
     if _client_loaded:
-        return _anthropic_client
+        return _openrouter_client
 
     settings = get_settings()
-    if settings.has_anthropic_config:
-        _anthropic_client = Anthropic(api_key=settings.anthropic_api_key)
-        logger.info("anthropic_client_initialized")
+    if settings.has_openrouter_config:
+        _openrouter_client = OpenAI(
+            api_key=settings.openrouter_api_key,
+            base_url=OPENROUTER_BASE_URL,
+        )
+        logger.info("openrouter_client_initialized")
     else:
-        logger.warning("anthropic_not_configured")
-        _anthropic_client = None
+        logger.warning("openrouter_not_configured")
+        _openrouter_client = None
 
     _client_loaded = True
-    return _anthropic_client
+    return _openrouter_client
 
 
 class AIService:
-    """Service for AI-powered video analysis using Claude."""
+    """Service for AI-powered video analysis using OpenRouter."""
 
     # Notes format prompts
     NOTES_PROMPTS = {
@@ -117,9 +123,9 @@ Requirements:
 Translated timestamps:"""
 
     @staticmethod
-    def _ensure_client() -> Anthropic:
-        """Ensure Anthropic client is available."""
-        client = get_anthropic_client()
+    def _ensure_client() -> OpenAI:
+        """Ensure OpenRouter client is available."""
+        client = get_openrouter_client()
         if not client:
             raise AIServiceUnavailableError()
         return client
@@ -144,7 +150,7 @@ Translated timestamps:"""
             Generated notes in markdown format
 
         Raises:
-            AIServiceUnavailableError: If Anthropic API is not configured
+            AIServiceUnavailableError: If OpenRouter API is not configured
         """
         logger.info("generating_notes", title=title, format=format)
 
@@ -157,15 +163,21 @@ Translated timestamps:"""
             transcript=transcript,
         )
 
-        message = client.messages.create(
-            model="claude-3-5-sonnet-20241022",
-            max_tokens=4000,
-            messages=[{"role": "user", "content": prompt}],
-        )
+        try:
+            response = client.chat.completions.create(
+                model="xiaomi/mimo-v2-flash:free",
+                max_tokens=4000,
+                messages=[{"role": "user", "content": prompt}],
+            )
 
-        notes = message.content[0].text
-        logger.info("notes_generated", char_count=len(notes), word_count=len(notes.split()))
-        return notes
+            notes = response.choices[0].message.content
+            if not notes:
+                raise AIServiceUnavailableError("Failed to generate notes from AI service")
+            logger.info("notes_generated", char_count=len(notes), word_count=len(notes.split()))
+            return notes
+        except Exception as e:
+            logger.error("notes_generation_failed", error=str(e), error_type=type(e).__name__)
+            raise AIServiceUnavailableError(f"Failed to generate notes: {str(e)}")
 
     @staticmethod
     async def translate_transcript(
@@ -189,7 +201,7 @@ Translated timestamps:"""
             Tuple of (translated_transcript, translated_timestamps)
 
         Raises:
-            AIServiceUnavailableError: If Anthropic API is not configured
+            AIServiceUnavailableError: If OpenRouter API is not configured
         """
         logger.info("translating_transcript", title=title, target_language=target_language)
 
@@ -203,13 +215,19 @@ Translated timestamps:"""
             transcript=transcript,
         )
 
-        message = client.messages.create(
-            model="claude-3-5-sonnet-20241022",
-            max_tokens=8000,
-            messages=[{"role": "user", "content": prompt}],
-        )
+        try:
+            response = client.chat.completions.create(
+                model="xiaomi/mimo-v2-flash:free",
+                max_tokens=8000,
+                messages=[{"role": "user", "content": prompt}],
+            )
 
-        translated_text = message.content[0].text
+            translated_text = response.choices[0].message.content
+            if not translated_text:
+                raise AIServiceUnavailableError("Failed to translate transcript from AI service")
+        except Exception as e:
+            logger.error("translation_failed", error=str(e), error_type=type(e).__name__)
+            raise AIServiceUnavailableError(f"Failed to translate transcript: {str(e)}")
 
         # Translate timestamps if provided
         translated_timestamps = []
@@ -223,13 +241,20 @@ Translated timestamps:"""
                 timestamps=timestamps_text,
             )
 
-            timestamp_message = client.messages.create(
-                model="claude-3-5-haiku-20241022",
-                max_tokens=2000,
-                messages=[{"role": "user", "content": timestamp_prompt}],
-            )
+            try:
+                timestamp_response = client.chat.completions.create(
+                    model="xiaomi/mimo-v2-flash:free",
+                    max_tokens=2000,
+                    messages=[{"role": "user", "content": timestamp_prompt}],
+                )
 
-            translated_timestamps = timestamp_message.content[0].text.strip().split("\n")
+                timestamp_content = timestamp_response.choices[0].message.content
+                if timestamp_content:
+                    translated_timestamps = timestamp_content.strip().split("\n")
+            except Exception as e:
+                logger.error("timestamp_translation_failed", error=str(e), error_type=type(e).__name__)
+                # Continue without timestamps if translation fails
+                translated_timestamps = []
 
         logger.info(
             "translation_complete",

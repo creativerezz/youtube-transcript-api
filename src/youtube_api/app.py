@@ -11,7 +11,7 @@ import structlog
 from .config import get_settings
 from .dependencies import limiter
 from .exceptions import YouTubeAPIError
-from .routers import ai_router, health_router, video_router
+from .routers import ai_router, health_router, storage_router, video_router
 from .services.cache import get_cache
 from .services.transcript import get_proxy_config
 from .services.youtube import close_http_client
@@ -44,7 +44,7 @@ async def lifespan(app: FastAPI):
         cache_enabled=cache.enabled,
         cache_ttl=cache.cache_ttl if cache.enabled else None,
         proxy_enabled=proxy_config is not None,
-        ai_enabled=settings.has_anthropic_config,
+        ai_enabled=settings.has_openrouter_config,
     )
 
     logger.info("available_endpoints", endpoints=[
@@ -58,6 +58,11 @@ async def lifespan(app: FastAPI):
         "POST /video-transcript-languages",
         "POST /video-notes",
         "POST /video-translate",
+        "POST /transcripts/save",
+        "POST /transcripts/get",
+        "GET /transcripts/list",
+        "POST /transcripts/delete",
+        "GET /transcripts/stats",
     ])
 
     logger.info("=" * 40)
@@ -98,6 +103,7 @@ async def youtube_api_error_handler(request: Request, exc: YouTubeAPIError):
 app.include_router(health_router)
 app.include_router(video_router)
 app.include_router(ai_router)
+app.include_router(storage_router)
 
 
 def run_server():

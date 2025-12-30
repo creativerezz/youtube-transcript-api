@@ -2,19 +2,19 @@
 
 ## Overview
 
-The YouTube API Server now includes AI-powered features for generating structured notes and translating video transcripts using Claude AI (Anthropic). These features are perfect for building YouTube video translation tools and note-taking applications.
+The YouTube API Server now includes AI-powered features for generating structured notes and translating video transcripts using Claude AI via OpenRouter. These features are perfect for building YouTube video translation tools and note-taking applications.
 
 ## 🔑 Setup
 
-### Get an Anthropic API Key
+### Get an OpenRouter API Key
 
-1. Visit [https://console.anthropic.com/](https://console.anthropic.com/)
+1. Visit [https://openrouter.ai/](https://openrouter.ai/)
 2. Sign up or log in
-3. Navigate to "API Keys"
+3. Navigate to "Keys" section
 4. Create a new API key
 5. Add to your `.env` file:
    ```bash
-   ANTHROPIC_API_KEY=sk-ant-api03-...
+   OPENROUTER_API_KEY=sk-or-v1-...
    ```
 
 ### Pricing (as of Dec 2025)
@@ -297,11 +297,11 @@ Auto-generate chapter markers and descriptions for YouTube videos.
 ### AI Features Not Available (503)
 ```json
 {
-  "detail": "AI features not available. Please configure ANTHROPIC_API_KEY environment variable."
+  "detail": "AI features not available. Please configure OPENROUTER_API_KEY environment variable."
 }
 ```
 
-**Fix:** Set the `ANTHROPIC_API_KEY` in your environment variables.
+**Fix:** Set the `OPENROUTER_API_KEY` in your environment variables.
 
 ### Invalid Video URL (400)
 ```json
@@ -335,7 +335,7 @@ Auto-generate chapter markers and descriptions for YouTube videos.
 3. **Language detection** - Check available languages first with `/video-transcript-languages`
 4. **Cost optimization** - Use "summary" format for cheaper note generation
 5. **Quality check** - Always review AI-generated content before publishing
-6. **Rate limiting** - Anthropic has rate limits; implement retry logic
+6. **Rate limiting** - OpenRouter has rate limits; implement retry logic
 
 ---
 
@@ -381,7 +381,7 @@ Auto-generate chapter markers and descriptions for YouTube videos.
 
 2. **Add API key to `.env`:**
    ```bash
-   ANTHROPIC_API_KEY=sk-ant-api03-...
+   OPENROUTER_API_KEY=sk-or-v1-...
    ```
 
 3. **Start server:**

@@ -120,3 +120,37 @@ class APIInfoResponse(BaseModel):
     endpoints: Dict[str, str]
     docs: str = "/docs"
     ai_features_available: bool
+
+
+class StoredTranscriptResponse(BaseModel):
+    """Response model for stored transcript."""
+
+    video_id: str
+    transcript: str
+    language: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None
+
+
+class StorageStatsResponse(BaseModel):
+    """Response model for storage statistics."""
+
+    enabled: bool
+    total_transcripts: Optional[int] = None
+    total_videos: Optional[int] = None
+    error: Optional[str] = None
+
+
+class StorageListResponse(BaseModel):
+    """Response model for listing stored transcripts."""
+
+    videos: List[Dict[str, Any]]
+    count: int
+
+
+class StorageSaveResponse(BaseModel):
+    """Response model for saving transcript."""
+
+    success: bool
+    message: str
+    video_id: str
+    timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
