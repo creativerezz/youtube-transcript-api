@@ -1,7 +1,7 @@
 [project]
-name = "youtube-api-server"
+name = "youtube-transcript-api"
 version = "2.0.0"
-description = "A FastAPI-based server for extracting YouTube video information"
+description = "A FastAPI-based server for extracting YouTube video transcripts and metadata"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.12"
@@ -28,7 +28,7 @@ dev = [
 ]
 
 [project.scripts]
-youtube-api-server = "src.youtube_api.app:run_server"
+youtube-transcript-api = "src.youtube_api.app:run_server"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
