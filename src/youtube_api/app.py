@@ -78,8 +78,8 @@ async def lifespan(app: FastAPI):
 
 # Create FastAPI app
 app = FastAPI(
-    title="YouTube Transcript API",
-    description="API for extracting YouTube video information, transcripts, and AI-powered features",
+    title="YouTube Summaries API",
+    description="API for extracting YouTube video information, transcripts, summaries, and AI-powered features",
     version="2.0.0",
     lifespan=lifespan,
 )

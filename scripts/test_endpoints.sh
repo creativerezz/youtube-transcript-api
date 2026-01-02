@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # =============================================================================
-# YouTube API Server - Endpoint Testing Script
+# YouTube Summaries API - Endpoint Testing Script
 # =============================================================================
-# This script tests all available endpoints of the YouTube API server
+# This script tests all available endpoints of the YouTube Summaries API server
 # Make sure the server is running before executing this script
 #
 # Usage:
@@ -35,7 +35,7 @@ HINDI_VIDEO2="https://www.youtube.com/watch?v=_8FALFC2VZ4"      # Another Hindi 
 SHORT_URL="https://youtu.be/dQw4w9WgXcQ"                        # Short YouTube URL format
 
 echo -e "${CYAN}=====================================================${NC}"
-echo -e "${CYAN}    YouTube API Server - Endpoint Testing Script${NC}"
+echo -e "${CYAN}    YouTube Summaries API - Endpoint Testing Script${NC}"
 echo -e "${CYAN}=====================================================${NC}"
 echo -e "Server URL: ${BLUE}$SERVER_URL${NC}"
 echo -e "Timeout: ${BLUE}$TIMEOUT seconds${NC}"

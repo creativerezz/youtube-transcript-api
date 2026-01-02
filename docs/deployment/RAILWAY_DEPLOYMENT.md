@@ -5,7 +5,7 @@ This guide will walk you through deploying the YouTube API Server to Railway.
 ## Prerequisites
 
 - Railway account (sign up at https://railway.app)
-- GitHub repository connected (already set up: https://github.com/creativerezz/youtube-api-server-1.git)
+- GitHub repository connected (already set up: https://github.com/creativerezz/youtube-summaries-api.git)
 - Railway CLI installed (already installed and authenticated)
 
 ## Deployment Steps
@@ -16,7 +16,7 @@ Since the Railway CLI requires interactive input, we'll use the Railway web dash
 
 1. Go to https://railway.app/new
 2. Click "Deploy from GitHub repo"
-3. Select your repository: `creativerezz/youtube-api-server-1`
+3. Select your repository: `creativerezz/youtube-summaries-api`
 4. Railway will automatically detect the Python project
 
 ### Step 2: Add Redis for Caching (Recommended)
@@ -231,4 +231,4 @@ Monitor your usage in the Railway dashboard.
 
 - Railway Documentation: https://docs.railway.app
 - Railway Discord: https://discord.gg/railway
-- GitHub Issues: https://github.com/creativerezz/youtube-api-server-1/issues
+- GitHub Issues: https://github.com/creativerezz/youtube-summaries-api/issues

@@ -1,6 +1,6 @@
-# YouTube Tools API Server
+# YouTube Summaries API
 
-A FastAPI-based server that provides convenient endpoints for extracting information from YouTube videos, including video metadata, captions, timestamped transcripts, and available transcript languages.
+A FastAPI-based server that provides convenient endpoints for extracting information from YouTube videos, including video metadata, captions, timestamped transcripts, summaries, and AI-powered features.
 
 ## Features
 
@@ -39,7 +39,7 @@ A FastAPI-based server that provides convenient endpoints for extracting informa
 
 Deploy this API server to Railway in 2 minutes:
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new?template=https://github.com/creativerezz/youtube-api-server-1)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new?template=https://github.com/creativerezz/youtube-summaries-api)
 
 See [QUICK_START.md](QUICK_START.md) for detailed deployment instructions.
 
@@ -52,8 +52,8 @@ See [QUICK_START.md](QUICK_START.md) for detailed deployment instructions.
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/zaidmukaddam/youtube-api-server.git
-cd youtube-api-server
+git clone https://github.com/creativerezz/youtube-summaries-api.git
+cd youtube-summaries-api
 ```
 
 2. Install dependencies using uv (recommended):
@@ -359,8 +359,8 @@ For major changes, please open an issue first to discuss what you would like to 
 
 1. Clone and install dependencies:
 ```bash
-git clone https://github.com/zaidmukaddam/youtube-api-server.git
-cd youtube-api-server
+git clone https://github.com/creativerezz/youtube-summaries-api.git
+cd youtube-summaries-api
 uv sync
 ```
 

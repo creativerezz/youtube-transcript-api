@@ -6,7 +6,7 @@ Your YouTube API Server is ready to deploy! I've already prepared everything you
 
 1. **Procfile** - Tells Railway how to start your app
 2. **nixpacks.toml** - Configures the build process with Python 3.12 and uv
-3. **GitHub Repository** - Already pushed and ready at https://github.com/creativerezz/youtube-api-server-1
+3. **GitHub Repository** - Already pushed and ready at https://github.com/creativerezz/youtube-summaries-api
 4. **Railway CLI** - Already authenticated as Reza Jafar (jafar.reza@icloud.com)
 
 ## Deploy Now (2 Minutes)
@@ -17,7 +17,7 @@ The Railway deployment page should already be open in your browser. If not:
 
 1. Visit: https://railway.app/new
 2. Click "Deploy from GitHub repo"
-3. Select: `creativerezz/youtube-api-server-1`
+3. Select: `creativerezz/youtube-summaries-api`
 4. Click "Deploy Now"
 
 Railway will automatically:
@@ -108,7 +108,7 @@ Once deployed, your API will have:
 - Detailed guide: See `RAILWAY_DEPLOYMENT.md`
 - Run helper script: `./deploy-to-railway.sh`
 - Railway docs: https://docs.railway.app
-- GitHub repo: https://github.com/creativerezz/youtube-api-server-1
+- GitHub repo: https://github.com/creativerezz/youtube-summaries-api
 
 ## Summary
 

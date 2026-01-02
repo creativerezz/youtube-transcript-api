@@ -115,7 +115,7 @@ class TranslationResponse(BaseModel):
 class APIInfoResponse(BaseModel):
     """Response model for root endpoint."""
 
-    name: str = "YouTube Transcript API"
+    name: str = "YouTube Summaries API"
     version: str = "2.0.0"
     endpoints: Dict[str, str]
     docs: str = "/docs"

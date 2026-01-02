@@ -68,7 +68,7 @@ Railway provides managed Redis as a service. Here's how to set it up:
 
 ```bash
 # Make sure you're in your project directory
-cd /path/to/youtube-api-server
+cd /path/to/youtube-summaries-api
 
 # Login to Railway (if not already)
 railway login
@@ -100,7 +100,7 @@ railway variables --set CACHE_TTL_SECONDS=3600
 
 **Via Railway Dashboard:**
 1. Open your project
-2. Click on your API service (youtube-api-server)
+2. Click on your API service
 3. Go to **"Variables"** tab
 4. Click **"+ New Variable"**
 5. Add: `REDIS_URL` = `${{Redis.REDIS_URL}}` (reference to Redis service)

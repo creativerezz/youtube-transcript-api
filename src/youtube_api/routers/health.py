@@ -24,7 +24,7 @@ router = APIRouter()
 async def root(openrouter=Depends(get_openrouter_dep)) -> Dict:
     """Root endpoint with API information."""
     return {
-        "name": "YouTube Transcript API",
+        "name": "YouTube Summaries API",
         "version": "2.0.0",
         "endpoints": {
             "GET /": "This info",

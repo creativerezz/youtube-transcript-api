@@ -15,7 +15,7 @@
   - Start command: `uv run uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}`
 
 ### 2. GitHub Repository
-- Repository: https://github.com/creativerezz/youtube-api-server-1
+- Repository: https://github.com/creativerezz/youtube-summaries-api
 - Status: All configuration files pushed to main branch
 - Latest commits:
   - Railway deployment configuration
@@ -39,12 +39,12 @@
 The Railway deployment page should be open in your browser. To complete the deployment:
 
 1. In the browser window that opened, click "Deploy from GitHub repo"
-2. Select repository: `creativerezz/youtube-api-server-1`
+2. Select repository: `creativerezz/youtube-summaries-api`
 3. Click "Deploy Now"
 4. Wait 1-2 minutes for deployment to complete
 
 Alternative URL if browser didn't open:
-https://railway.app/new?template=https://github.com/creativerezz/youtube-api-server-1
+https://railway.app/new?template=https://github.com/creativerezz/youtube-summaries-api
 
 ### Step 2: Get Your Deployment URL
 
@@ -159,7 +159,7 @@ For detailed troubleshooting, see: RAILWAY_DEPLOYMENT.md
 ## Quick Reference
 
 - **Project Directory**: /Users/reza/Boilerplates/youtube-api-server
-- **GitHub Repo**: https://github.com/creativerezz/youtube-api-server-1
+- **GitHub Repo**: https://github.com/creativerezz/youtube-summaries-api
 - **Railway Dashboard**: https://railway.app/dashboard
 - **Documentation**: QUICK_START.md and RAILWAY_DEPLOYMENT.md
 

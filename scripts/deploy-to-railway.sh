@@ -57,7 +57,7 @@ else
     echo -e "${BLUE}Option 1: Create via Web Dashboard (Recommended)${NC}"
     echo "1. Visit: https://railway.app/new"
     echo "2. Click 'Deploy from GitHub repo'"
-    echo "3. Select: creativerezz/youtube-api-server-1"
+    echo "3. Select: creativerezz/youtube-summaries-api"
     echo "4. Railway will automatically deploy"
     echo "5. Get your deployment URL from the dashboard"
     echo ""
@@ -67,7 +67,7 @@ else
     echo "3. Select your project"
     echo "4. Run: railway up"
     echo ""
-    echo -e "${GREEN}Quick Link:${NC} https://railway.app/new?template=https://github.com/creativerezz/youtube-api-server-1"
+    echo -e "${GREEN}Quick Link:${NC} https://railway.app/new?template=https://github.com/creativerezz/youtube-summaries-api"
     echo ""
 
     # Try to open the Railway new project page
