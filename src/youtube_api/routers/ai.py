@@ -3,16 +3,17 @@
 from datetime import datetime
 from typing import Dict
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 import structlog
 
 from ..dependencies import get_openrouter_dep, limiter
 from ..exceptions import AIServiceUnavailableError, InvalidURLError, TranscriptNotFoundError
-from ..models.requests import VideoNotesRequest, VideoTranslateRequest
-from ..models.responses import NotesResponse, TranslationResponse
+from ..models.requests import VideoNotesRequest, VideoPatternRequest, VideoTranslateRequest
+from ..models.responses import NotesResponse, PatternProcessingResponse, TranslationResponse
 from ..services.ai import AIService
 from ..services.transcript import TranscriptService
 from ..services.youtube import YouTubeService
+from ..utils.prompt_service import get_prompt_service
 
 logger = structlog.get_logger(__name__)
 router = APIRouter()

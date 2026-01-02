@@ -263,3 +263,54 @@ Translated timestamps:"""
         )
 
         return translated_text, translated_timestamps
+
+    @staticmethod
+    async def process_with_pattern(
+        pattern_content: str,
+        transcript: str,
+        title: str = "Unknown",
+        author: str = "Unknown",
+    ) -> str:
+        """
+        Process transcript using a Fabric-style pattern template.
+
+        Args:
+            pattern_content: The pattern template content (system.md)
+            transcript: Video transcript to process
+            title: Video title (for context)
+            author: Channel name (for context)
+
+        Returns:
+            Processed output from the pattern
+
+        Raises:
+            AIServiceUnavailableError: If OpenRouter API is not configured
+        """
+        logger.info("processing_with_pattern", title=title, pattern_length=len(pattern_content))
+
+        client = AIService._ensure_client()
+
+        # Fabric patterns expect INPUT: at the end where we insert the transcript
+        # Add context about the video
+        context = f"Video Title: {title}\nChannel: {author}\n\n"
+        full_input = context + transcript
+
+        # Replace the INPUT: placeholder with the actual transcript
+        prompt = pattern_content.replace("INPUT:", full_input)
+
+        try:
+            response = client.chat.completions.create(
+                model="xiaomi/mimo-v2-flash:free",
+                max_tokens=4000,
+                messages=[{"role": "user", "content": prompt}],
+            )
+
+            result = response.choices[0].message.content
+            if not result:
+                raise AIServiceUnavailableError("Failed to process pattern from AI service")
+
+            logger.info("pattern_processed", char_count=len(result), word_count=len(result.split()))
+            return result
+        except Exception as e:
+            logger.error("pattern_processing_failed", error=str(e), error_type=type(e).__name__)
+            raise AIServiceUnavailableError(f"Failed to process with pattern: {str(e)}")

@@ -55,3 +55,21 @@ class SaveTranscriptRequest(BaseModel):
         default=True,
         description="Automatically save transcripts when fetched",
     )
+
+
+class VideoPatternRequest(BaseModel):
+    """Request model for processing video with a pattern template."""
+
+    url: str = Field(..., description="YouTube URL or video ID")
+    pattern: str = Field(
+        ...,
+        description="Pattern name to apply (e.g., 'extract_ideas', 'create_summary')",
+    )
+    languages: Optional[List[str]] = Field(
+        default=None,
+        description="Preferred transcript languages",
+    )
+    translate_to: Optional[str] = Field(
+        default=None,
+        description="Translate transcript before pattern processing (e.g., 'Spanish', 'French')",
+    )

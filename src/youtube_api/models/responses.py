@@ -154,3 +154,17 @@ class StorageSaveResponse(BaseModel):
     message: str
     video_id: str
     timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+
+class PatternProcessingResponse(BaseModel):
+    """Response model for pattern-based transcript processing."""
+
+    video_title: Optional[str] = None
+    channel: Optional[str] = None
+    pattern: str = Field(..., description="Pattern name used")
+    pattern_category: str = Field(..., description="Pattern category")
+    result: str = Field(..., description="Processed output from pattern")
+    translated: bool = Field(default=False, description="Whether transcript was translated first")
+    translation_language: Optional[str] = None
+    word_count: int = Field(..., description="Word count of result")
+    timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
