@@ -15,8 +15,9 @@ A FastAPI-based server that provides convenient endpoints for extracting informa
 ### AI-Powered Features 🤖 (New!)
 - **Generate structured notes** from video transcripts (summary, structured, or detailed)
 - **Translate transcripts** to 50+ languages with AI
+- **OpenRouter API proxy** - Direct access to 100+ AI models (default: free Xiaomi MiMo model)
 - Perfect for building YouTube video translation tools with ElevenLabs voice dubbing
-- Powered by OpenRouter (Claude 3.5 via OpenRouter)
+- Powered by OpenRouter (Claude 3.5 and 100+ other models available)
 
 ### Performance & Infrastructure
 - **Redis caching layer** for 10-56x performance boost on video data
@@ -231,6 +232,51 @@ POST /video-timestamps
 
 **Response:** List of timestamps with corresponding caption text and timing information.
 
+### 8. OpenRouter API Proxy
+```http
+POST /openrouter-proxy
+```
+
+**Request Body:**
+```json
+{
+    "prompt": "Your prompt here",
+    "model": "xiaomi/mimo-v2-flash:free",  // Optional, defaults to xiaomi/mimo-v2-flash:free
+    "max_tokens": 800  // Optional, defaults to 800
+}
+```
+
+**Response:** Raw response from OpenRouter API including model output, usage statistics, and cost information.
+
+**Example:**
+```json
+{
+  "response": {
+    "id": "gen-...",
+    "model": "xiaomi/mimo-v2-flash:free",
+    "choices": [{
+      "message": {
+        "role": "assistant",
+        "content": "Your AI-generated response here"
+      }
+    }],
+    "usage": {
+      "prompt_tokens": 43,
+      "completion_tokens": 16,
+      "total_tokens": 59,
+      "cost": 0
+    }
+  }
+}
+```
+
+**Features:**
+- Direct proxy to OpenRouter's chat completions API
+- Default free model: `xiaomi/mimo-v2-flash:free` (no cost)
+- Support for custom model selection
+- Rate limited to 30 requests/minute
+- Requires `OPENROUTER_API_KEY` environment variable
+
 ## Example Usage
 
 ### Using curl
@@ -258,6 +304,11 @@ curl -X POST "http://localhost:8000/video-captions" \
 curl -X POST "http://localhost:8000/video-timestamps" \
      -H "Content-Type: application/json" \
      -d '{"url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "languages": ["en"]}'
+
+# Use OpenRouter proxy for AI requests
+curl -X POST "http://localhost:8000/openrouter-proxy" \
+     -H "Content-Type: application/json" \
+     -d '{"prompt": "Explain quantum computing in simple terms"}'
 ```
 
 ### Using Python
@@ -277,6 +328,12 @@ metadata = response.json()
 response = requests.post(f"{base_url}/video-captions",
                         json={"url": video_url, "languages": ["en"]})
 captions = response.json()["captions"]
+
+# Use OpenRouter proxy
+response = requests.post(f"{base_url}/openrouter-proxy",
+                        json={"prompt": "Summarize this video transcript",
+                              "max_tokens": 500})
+ai_response = response.json()["response"]["choices"][0]["message"]["content"]
 ```
 
 ## Testing
