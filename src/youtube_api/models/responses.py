@@ -168,3 +168,9 @@ class PatternProcessingResponse(BaseModel):
     translation_language: Optional[str] = None
     word_count: int = Field(..., description="Word count of result")
     timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+
+class OpenRouterProxyResponse(BaseModel):
+    """Response model for OpenRouter API proxy."""
+
+    response: Any = Field(..., description="Raw response from OpenRouter API")

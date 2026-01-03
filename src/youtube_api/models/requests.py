@@ -73,3 +73,17 @@ class VideoPatternRequest(BaseModel):
         default=None,
         description="Translate transcript before pattern processing (e.g., 'Spanish', 'French')",
     )
+
+
+class OpenRouterProxyRequest(BaseModel):
+    """Request model for OpenRouter API proxy."""
+
+    prompt: str = Field(..., description="The prompt to send to the AI model")
+    model: Optional[str] = Field(
+        default=None,
+        description="Model name (defaults to xiaomi/mimo-v2-flash:free if not specified)",
+    )
+    max_tokens: Optional[int] = Field(
+        default=800,
+        description="Maximum tokens to generate",
+    )

@@ -58,6 +58,7 @@ async def lifespan(app: FastAPI):
         "POST /video-transcript-languages",
         "POST /video-notes",
         "POST /video-translate",
+        "POST /openrouter-proxy",
         "POST /transcripts/save",
         "POST /transcripts/get",
         "GET /transcripts/list",

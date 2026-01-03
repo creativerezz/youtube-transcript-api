@@ -1,15 +1,17 @@
 """AI-powered endpoints for video notes and translation."""
 
 from datetime import datetime
-from typing import Dict
+from typing import Any, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, Request
+import httpx
 import structlog
 
+from ..config import get_settings
 from ..dependencies import get_openrouter_dep, limiter
 from ..exceptions import AIServiceUnavailableError, InvalidURLError, TranscriptNotFoundError
-from ..models.requests import VideoNotesRequest, VideoPatternRequest, VideoTranslateRequest
-from ..models.responses import NotesResponse, PatternProcessingResponse, TranslationResponse
+from ..models.requests import OpenRouterProxyRequest, VideoNotesRequest, VideoPatternRequest, VideoTranslateRequest
+from ..models.responses import NotesResponse, OpenRouterProxyResponse, PatternProcessingResponse, TranslationResponse
 from ..services.ai import AIService
 from ..services.transcript import TranscriptService
 from ..services.youtube import YouTubeService
@@ -123,3 +125,70 @@ async def translate_video_transcript(
         raise e.to_http_exception()
     except AIServiceUnavailableError as e:
         raise e.to_http_exception()
+
+
+@router.post("/openrouter-proxy", response_model=OpenRouterProxyResponse)
+@limiter.limit("30/minute")
+async def openrouter_proxy(
+    request: Request,
+    body: OpenRouterProxyRequest,
+    openrouter=Depends(get_openrouter_dep),
+) -> Dict[str, Any]:
+    """
+    Proxy endpoint for OpenRouter API.
+
+    Forwards requests to OpenRouter's chat completions endpoint.
+    Requires OPENROUTER_API_KEY to be configured.
+    """
+    logger.info("openrouter_proxy_request", model=body.model, max_tokens=body.max_tokens)
+
+    if not openrouter:
+        raise AIServiceUnavailableError().to_http_exception()
+
+    try:
+        settings = get_settings()
+        if not settings.openrouter_api_key:
+            raise HTTPException(
+                status_code=500,
+                detail="OPENROUTER_API_KEY not configured"
+            )
+
+        model = body.model or "xiaomi/mimo-v2-flash:free"
+
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {settings.openrouter_api_key}",
+                },
+                json={
+                    "model": model,
+                    "messages": [{"role": "user", "content": body.prompt}],
+                    "max_tokens": body.max_tokens,
+                },
+            )
+
+            response.raise_for_status()
+            data = response.json()
+
+            return {"response": data}
+
+    except httpx.HTTPStatusError as e:
+        logger.error("openrouter_http_error", status=e.response.status_code, detail=str(e))
+        raise HTTPException(
+            status_code=e.response.status_code,
+            detail=f"OpenRouter API error: {e.response.text}"
+        )
+    except httpx.RequestError as e:
+        logger.error("openrouter_request_error", detail=str(e))
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to connect to OpenRouter: {str(e)}"
+        )
+    except Exception as e:
+        logger.error("openrouter_unexpected_error", error=str(e))
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {str(e)}"
+        )
