@@ -1,0 +1,35 @@
+{
+  "name": "youtube-api-edge",
+  "version": "1.0.0",
+  "description": "Cloudflare Workers edge layer for YouTube Summaries API",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:staging": "wrangler deploy --env staging",
+    "tail": "wrangler tail",
+    "types": "wrangler types",
+    "migrate": "wrangler d1 migrations apply youtubesummaries-transcript-storage",
+    "migrate:local": "wrangler d1 migrations apply youtubesummaries-transcript-storage --local"
+  },
+  "keywords": [
+    "cloudflare",
+    "workers",
+    "youtube",
+    "edge",
+    "d1",
+    "kv",
+    "upstash"
+  ],
+  "author": "Reza Jafar2",
+  "license": "MIT",
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250107.0",
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.3",
+    "wrangler": "^4.39.0"
+  },
+  "dependencies": {
+    "@upstash/redis": "^1.36.0"
+  }
+}

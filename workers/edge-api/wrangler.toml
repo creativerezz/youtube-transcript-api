@@ -1,0 +1,31 @@
+name = "youtube-api-edge"
+main = "./src/index.ts"
+compatibility_date = "2025-01-01"
+
+# KV Namespace for ultra-fast edge caching (5 min TTL)
+[[kv_namespaces]]
+binding = "CACHE_KV"
+id = "ecbe0e2f37e44689adc9d6fe7655d5ed"
+
+# D1 Database for persistent transcript storage
+[[d1_databases]]
+binding = "DB"
+database_name = "youtubesummaries-transcript-storage"
+database_id = "75f4e071-25e8-4ca6-abc3-698f9366e1b8"
+migrations_dir = "../../migrations"
+
+# Environment variables (non-sensitive)
+[vars]
+ENVIRONMENT = "production"
+CACHE_KV_TTL = 300  # 5 minutes
+UPSTASH_TTL = 3600  # 1 hour
+RAILWAY_ORIGIN_URL = "https://transcript.youtubesummaries.cc"
+
+# Secrets (set via: wrangler secret put SECRET_NAME)
+# - UPSTASH_REDIS_REST_URL
+# - UPSTASH_REDIS_REST_TOKEN
+
+# Routes (configure after deployment)
+# routes = [
+#   { pattern = "edge.youtubesummaries.cc/*", zone_name = "youtubesummaries.cc" }
+# ]

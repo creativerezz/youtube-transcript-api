@@ -35,6 +35,8 @@ A FastAPI-based server that provides convenient endpoints for extracting informa
 - 📘 **[Frontend Integration Guide](FRONTEND_INTEGRATION.md)** - Complete React, Vue, Next.js examples
 - 🎯 **[Quick Start](QUICK_START.md)** - Get started in 2 minutes
 - 📊 **[Redis Setup](REDIS_SETUP.md)** - Enable caching for 10-56x performance boost
+- 📖 **[API Documentation](API_DOCUMENTATION.md)** - Complete API reference with examples
+- 🧪 **[Testing Guide](TESTING_GUIDE.md)** - Performance testing and quality assurance
 
 ## Quick Deploy to Railway
 
@@ -338,24 +340,38 @@ ai_response = response.json()["response"]["choices"][0]["message"]["content"]
 
 ## Testing
 
-The project includes a comprehensive testing script that tests all endpoints with various scenarios:
+The project includes a comprehensive performance testing suite with detailed metrics:
 
 ```bash
-chmod +x test_endpoints.sh
+# Run all performance tests
+./run_tests.sh
+
+# Run specific test suite
+./run_tests.sh health    # Health & cache endpoints
+./run_tests.sh video     # Video data endpoints
+./run_tests.sh ai        # AI-powered endpoints
+./run_tests.sh storage   # Storage endpoints
+./run_tests.sh prompts   # Prompt management
+
+# Skip optional tests
+./run_tests.sh --skip-ai --skip-storage
+```
+
+**Test Coverage:**
+- ✓ Performance metrics (response times, throughput, success rates)
+- ✓ All 22 API endpoints
+- ✓ Error handling and edge cases
+- ✓ Cache effectiveness
+- ✓ Complete workflow testing
+
+**See [TESTING_GUIDE.md](TESTING_GUIDE.md) for detailed testing documentation.**
+
+### Legacy Test Script
+
+The original endpoint test script is still available:
+```bash
 ./test_endpoints.sh
 ```
-
-Or test against a custom server:
-```bash
-./test_endpoints.sh http://your-server:8000
-```
-
-The test script covers:
-- All API endpoints
-- Multiple video types (English, Hindi, etc.)
-- Language fallback scenarios
-- Error handling
-- Edge cases and invalid inputs
 
 ## Error Handling
 

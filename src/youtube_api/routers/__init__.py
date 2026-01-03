@@ -4,5 +4,6 @@ from .health import router as health_router
 from .video import router as video_router
 from .ai import router as ai_router
 from .storage import router as storage_router
+from .prompts import router as prompts_router
 
-__all__ = ["health_router", "video_router", "ai_router", "storage_router"]
+__all__ = ["health_router", "video_router", "ai_router", "storage_router", "prompts_router"]

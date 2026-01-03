@@ -11,7 +11,7 @@ import structlog
 from .config import get_settings
 from .dependencies import limiter
 from .exceptions import YouTubeAPIError
-from .routers import ai_router, health_router, storage_router, video_router
+from .routers import ai_router, health_router, prompts_router, storage_router, video_router
 from .services.cache import get_cache
 from .services.transcript import get_proxy_config
 from .services.youtube import close_http_client
@@ -105,6 +105,7 @@ app.include_router(health_router)
 app.include_router(video_router)
 app.include_router(ai_router)
 app.include_router(storage_router)
+app.include_router(prompts_router)
 
 
 def run_server():
